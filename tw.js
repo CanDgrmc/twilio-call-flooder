@@ -7,6 +7,11 @@ const {
     delayDuration,
     delayStatuses
 } = require('./config')
+const FgRed = "\x1b[31m"
+const FgGreen = "\x1b[32m"
+const FgYellow = "\x1b[33m"
+const FgCyan = "\x1b[36m"
+const FgWhite = "\x1b[37m"
 
 const client = require('twilio')(accountSid, authToken);
 const delay = () => new Promise(resolve => setTimeout(resolve, delayDuration))
@@ -14,10 +19,11 @@ const delay = () => new Promise(resolve => setTimeout(resolve, delayDuration))
 
 class flooder {
     async run() {
-        let count = 0;
-        while (limit ? limit > count : true) {
+        let count = 1;
+        while (limit ? limit >= count : true) {
             try {
                 for (let from of listFromNumbers) {
+                    
                     let r = await this.makeCall({
                         from,
                         to: toNumber
@@ -27,18 +33,17 @@ class flooder {
                         r,
                         from
                     })
-                    console.log(res)
 
-                    //console.log(`calling.. ${r.sid}`)
+                    count++
                 }
 
             } catch (e) {
                 console.log(`error: ${e.message}`)
             }
-            count++
+            
         }
 
-        console.log('loop ended.. bye.')
+        console.log(`${FgRed}loop ended.. bye.`)
 
     }
 
@@ -62,10 +67,10 @@ class flooder {
     }) {
         let a = await client.calls.list()
         a = a.filter(call => call.sid == r.sid)[0]
-        console.log(`${from} calling.. status: ${a.status}`)
+        console.log(`${FgGreen}${from} calling.. status: ${a.status}`)
 
         if (delayStatuses[a.status]) {
-            console.log('delaying the next call..')
+            console.log(`${FgYellow}delaying the next call..`)
             await delay()
             await this.checkState({
                 r,
@@ -81,4 +86,4 @@ class flooder {
 }
 
 const f = new flooder()
-f.run()
+f.run().then().catch( err=> console.error(err) )
