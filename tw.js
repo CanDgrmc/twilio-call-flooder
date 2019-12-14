@@ -54,9 +54,7 @@ class flooder {
                 from,
             })
     }
-    async fetch(r) {
-        console.log(r)
-    }
+  
 
     async checkState({
         r,
